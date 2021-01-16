@@ -1,4 +1,4 @@
-// Project class
+// Project Type
 enum ProjectStatus {
   Active,
   Finished,
@@ -45,7 +45,6 @@ class ProjectState {
       ProjectStatus.Active
     );
     this.projects.push(newProject);
-
     for (const listenerFn of this.listeners) {
       listenerFn(this.projects.slice());
     }
@@ -69,15 +68,13 @@ function validate(validatableInput: Validatable) {
   if (validatableInput.required) {
     isValid = isValid && validatableInput.value.toString().trim().length !== 0;
   }
-
   if (
     validatableInput.minLength != null &&
     typeof validatableInput.value === 'string'
   ) {
-    isValid = isValid =
+    isValid =
       isValid && validatableInput.value.length >= validatableInput.minLength;
   }
-
   if (
     validatableInput.maxLength != null &&
     typeof validatableInput.value === 'string'
@@ -85,25 +82,22 @@ function validate(validatableInput: Validatable) {
     isValid =
       isValid && validatableInput.value.length <= validatableInput.maxLength;
   }
-
   if (
     validatableInput.min != null &&
     typeof validatableInput.value === 'number'
   ) {
     isValid = isValid && validatableInput.value >= validatableInput.min;
   }
-
   if (
     validatableInput.max != null &&
     typeof validatableInput.value === 'number'
   ) {
     isValid = isValid && validatableInput.value <= validatableInput.max;
   }
-
   return isValid;
 }
 
-// auto decorator
+// autobind decorator
 function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
   const adjDescriptor: PropertyDescriptor = {
@@ -113,7 +107,6 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
       return boundFn;
     },
   };
-
   return adjDescriptor;
 }
 
@@ -122,29 +115,30 @@ class ProjectList {
   templateElement: HTMLTemplateElement;
   hostElement: HTMLDivElement;
   element: HTMLElement;
-  assignedProject: Project[];
+  assignedProjects: Project[];
 
   constructor(private type: 'active' | 'finished') {
     this.templateElement = document.getElementById(
       'project-list'
     )! as HTMLTemplateElement;
     this.hostElement = document.getElementById('app')! as HTMLDivElement;
-    this.assignedProject = [];
+    this.assignedProjects = [];
 
-    const importNode = document.importNode(this.templateElement.content, true);
-    this.element = importNode.firstElementChild as HTMLElement;
+    const importedNode = document.importNode(
+      this.templateElement.content,
+      true
+    );
+    this.element = importedNode.firstElementChild as HTMLElement;
     this.element.id = `${this.type}-projects`;
 
     projectState.addListener((projects: Project[]) => {
       const relevantProjects = projects.filter((prj) => {
         if (this.type === 'active') {
-          prj.status === ProjectStatus.Active;
+          return prj.status === ProjectStatus.Active;
         }
-
-        prj.status === ProjectStatus.Finished;
+        return prj.status === ProjectStatus.Finished;
       });
-
-      this.assignedProject = relevantProjects;
+      this.assignedProjects = relevantProjects;
       this.renderProjects();
     });
 
@@ -154,10 +148,10 @@ class ProjectList {
 
   private renderProjects() {
     const listEl = document.getElementById(
-      `${this.type}-project-list`
+      `${this.type}-projects-list`
     )! as HTMLUListElement;
     listEl.innerHTML = '';
-    for (const prjItem of this.assignedProject) {
+    for (const prjItem of this.assignedProjects) {
       const listItem = document.createElement('li');
       listItem.textContent = prjItem.title;
       listEl.appendChild(listItem);
@@ -165,7 +159,7 @@ class ProjectList {
   }
 
   private renderContent() {
-    const listId = `${this.type}-project-list`;
+    const listId = `${this.type}-projects-list`;
     this.element.querySelector('ul')!.id = listId;
     this.element.querySelector('h2')!.textContent =
       this.type.toUpperCase() + ' PROJECTS';
@@ -191,8 +185,11 @@ class ProjectInput {
     )! as HTMLTemplateElement;
     this.hostElement = document.getElementById('app')! as HTMLDivElement;
 
-    const importNode = document.importNode(this.templateElement.content, true);
-    this.element = importNode.firstElementChild as HTMLFormElement;
+    const importedNode = document.importNode(
+      this.templateElement.content,
+      true
+    );
+    this.element = importedNode.firstElementChild as HTMLFormElement;
     this.element.id = 'user-input';
 
     this.titleInputElement = this.element.querySelector(
@@ -218,13 +215,11 @@ class ProjectInput {
       value: enteredTitle,
       required: true,
     };
-
     const descriptionValidatable: Validatable = {
       value: enteredDescription,
       required: true,
       minLength: 5,
     };
-
     const peopleValidatable: Validatable = {
       value: +enteredPeople,
       required: true,
@@ -237,14 +232,14 @@ class ProjectInput {
       !validate(descriptionValidatable) ||
       !validate(peopleValidatable)
     ) {
-      alert('Invalid input, please try again');
+      alert('Invalid input, please try again!');
       return;
     } else {
       return [enteredTitle, enteredDescription, +enteredPeople];
     }
   }
 
-  private clearInput() {
+  private clearInputs() {
     this.titleInputElement.value = '';
     this.descriptionInputElement.value = '';
     this.peopleInputElement.value = '';
@@ -253,13 +248,11 @@ class ProjectInput {
   @autobind
   private submitHandler(event: Event) {
     event.preventDefault();
-
     const userInput = this.gatherUserInput();
     if (Array.isArray(userInput)) {
       const [title, desc, people] = userInput;
       projectState.addProject(title, desc, people);
-
-      this.clearInput();
+      this.clearInputs();
     }
   }
 
@@ -272,6 +265,6 @@ class ProjectInput {
   }
 }
 
-const pjInput = new ProjectInput();
+const prjInput = new ProjectInput();
 const activePrjList = new ProjectList('active');
 const finishedPrjList = new ProjectList('finished');

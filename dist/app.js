@@ -50,7 +50,7 @@ function validate(validatableInput) {
     }
     if (validatableInput.minLength != null &&
         typeof validatableInput.value === 'string') {
-        isValid = isValid =
+        isValid =
             isValid && validatableInput.value.length >= validatableInput.minLength;
     }
     if (validatableInput.maxLength != null &&
@@ -84,34 +84,34 @@ class ProjectList {
         this.type = type;
         this.templateElement = document.getElementById('project-list');
         this.hostElement = document.getElementById('app');
-        this.assignedProject = [];
-        const importNode = document.importNode(this.templateElement.content, true);
-        this.element = importNode.firstElementChild;
+        this.assignedProjects = [];
+        const importedNode = document.importNode(this.templateElement.content, true);
+        this.element = importedNode.firstElementChild;
         this.element.id = `${this.type}-projects`;
         projectState.addListener((projects) => {
             const relevantProjects = projects.filter((prj) => {
                 if (this.type === 'active') {
-                    prj.status === ProjectStatus.Active;
+                    return prj.status === ProjectStatus.Active;
                 }
-                prj.status === ProjectStatus.Finished;
+                return prj.status === ProjectStatus.Finished;
             });
-            this.assignedProject = relevantProjects;
+            this.assignedProjects = relevantProjects;
             this.renderProjects();
         });
         this.attach();
         this.renderContent();
     }
     renderProjects() {
-        const listEl = document.getElementById(`${this.type}-project-list`);
+        const listEl = document.getElementById(`${this.type}-projects-list`);
         listEl.innerHTML = '';
-        for (const prjItem of this.assignedProject) {
+        for (const prjItem of this.assignedProjects) {
             const listItem = document.createElement('li');
             listItem.textContent = prjItem.title;
             listEl.appendChild(listItem);
         }
     }
     renderContent() {
-        const listId = `${this.type}-project-list`;
+        const listId = `${this.type}-projects-list`;
         this.element.querySelector('ul').id = listId;
         this.element.querySelector('h2').textContent =
             this.type.toUpperCase() + ' PROJECTS';
@@ -124,8 +124,8 @@ class ProjectInput {
     constructor() {
         this.templateElement = document.getElementById('project-input');
         this.hostElement = document.getElementById('app');
-        const importNode = document.importNode(this.templateElement.content, true);
-        this.element = importNode.firstElementChild;
+        const importedNode = document.importNode(this.templateElement.content, true);
+        this.element = importedNode.firstElementChild;
         this.element.id = 'user-input';
         this.titleInputElement = this.element.querySelector('#title');
         this.descriptionInputElement = this.element.querySelector('#description');
@@ -155,14 +155,14 @@ class ProjectInput {
         if (!validate(titleValidatable) ||
             !validate(descriptionValidatable) ||
             !validate(peopleValidatable)) {
-            alert('Invalid input, please try again');
+            alert('Invalid input, please try again!');
             return;
         }
         else {
             return [enteredTitle, enteredDescription, +enteredPeople];
         }
     }
-    clearInput() {
+    clearInputs() {
         this.titleInputElement.value = '';
         this.descriptionInputElement.value = '';
         this.peopleInputElement.value = '';
@@ -173,7 +173,7 @@ class ProjectInput {
         if (Array.isArray(userInput)) {
             const [title, desc, people] = userInput;
             projectState.addProject(title, desc, people);
-            this.clearInput();
+            this.clearInputs();
         }
     }
     configure() {
@@ -186,7 +186,7 @@ class ProjectInput {
 __decorate([
     autobind
 ], ProjectInput.prototype, "submitHandler", null);
-const pjInput = new ProjectInput();
+const prjInput = new ProjectInput();
 const activePrjList = new ProjectList('active');
 const finishedPrjList = new ProjectList('finished');
 //# sourceMappingURL=app.js.map
